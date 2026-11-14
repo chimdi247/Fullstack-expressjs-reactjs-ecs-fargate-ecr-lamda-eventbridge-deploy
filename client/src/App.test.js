@@ -24,6 +24,6 @@ test("renders the bookstore dashboard and support entry point", async () => {
   expect(screen.getByRole("button", { name: /open support bot/i })).toBeInTheDocument();
 
   await waitFor(() => {
-    expect(axios.get).toHaveBeenCalledWith("http://aluru.site/books");
+    expect(axios.get).toHaveBeenCalledWith("http://vhbj.site/books");
   });
 });
