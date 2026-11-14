@@ -29,8 +29,6 @@ jobs:
       AWS_REGION_SECRET: ${{ secrets.AWS_REGION }}
       TF_STATE_BUCKET_VAR: ${{ vars.TF_STATE_BUCKET }}
       TF_STATE_BUCKET_SECRET: ${{ secrets.TF_STATE_BUCKET }}
-      TF_LOCK_TABLE_VAR: ${{ vars.TF_LOCK_TABLE }}
-      TF_LOCK_TABLE_SECRET: ${{ secrets.TF_LOCK_TABLE }}
 
     steps:
       - name: Checkout repository
@@ -62,7 +60,6 @@ jobs:
             echo "- Destroy confirmation provided: \`${{ inputs.destroy_confirmation != '' }}\`"
             echo "- Remote state key: \`vpc-network/terraform.tfstate\`"
             echo "- TF_STATE_BUCKET detected: \`${{ vars.TF_STATE_BUCKET != '' || secrets.TF_STATE_BUCKET != '' }}\`"
-            echo "- TF_LOCK_TABLE detected: \`${{ vars.TF_LOCK_TABLE != '' || secrets.TF_LOCK_TABLE != '' }}\`"
             echo ""
             echo "This workflow is manual-only. It never runs automatically on push or pull request."
           } >> $GITHUB_STEP_SUMMARY
@@ -75,21 +72,15 @@ jobs:
         shell: bash
         working-directory: ${{ env.TF_WORKING_DIR }}
         run: |
-          TF_STATE_BUCKET="${TF_STATE_BUCKET_VAR:-$TF_STATE_BUCKET_SECRET}"
-          TF_LOCK_TABLE="${TF_LOCK_TABLE_VAR:-$TF_LOCK_TABLE_SECRET}"
-          AWS_REGION="${AWS_REGION_VAR:-$AWS_REGION_SECRET}"
+          TF_STATE_BUCKET="$(printf '%s' "${TF_STATE_BUCKET_VAR:-$TF_STATE_BUCKET_SECRET}" | tr -d '[:space:]')"
+          AWS_REGION="$(printf '%s' "${AWS_REGION_VAR:-$AWS_REGION_SECRET}" | tr -d '[:space:]')"
 
           if [ -z "$AWS_REGION" ]; then
-            AWS_REGION="us-east-1"
+            AWS_REGION="eu-west-2"
           fi
 
           if [ -z "$TF_STATE_BUCKET" ]; then
             echo "Missing TF_STATE_BUCKET. Add it in GitHub Actions Variables or Secrets."
-            exit 1
-          fi
-
-          if [ -z "$TF_LOCK_TABLE" ]; then
-            echo "Missing TF_LOCK_TABLE. Add it in GitHub Actions Variables or Secrets."
             exit 1
           fi
 
@@ -98,7 +89,7 @@ jobs:
             -backend-config="key=vpc-network/terraform.tfstate"
             -backend-config="region=$AWS_REGION"
             -backend-config="encrypt=true"
-            -backend-config="dynamodb_table=$TF_LOCK_TABLE"
+            -backend-config="use_lockfile=true"
           )
 
           terraform init -input=false -no-color "${BACKEND_ARGS[@]}"
@@ -112,19 +103,21 @@ jobs:
         working-directory: ${{ env.TF_WORKING_DIR }}
         run: terraform plan -input=false -no-color
 
+      - name: Confirm destroy request
+        if: inputs.terraform_action == 'destroy'
+        shell: bash
+        env:
+          CONFIRM: ${{ inputs.destroy_confirmation }}
+        run: |
+          if [ "$CONFIRM" != "DESTROY" ]; then
+            echo "Destroy confirmation missing. Type DESTROY in the workflow input to continue."
+            exit 1
+          fi
+
       - name: Terraform destroy plan
         if: inputs.terraform_action == 'destroy'
         working-directory: ${{ env.TF_WORKING_DIR }}
         run: terraform plan -destroy -input=false -no-color
-
-      - name: Confirm destroy request
-        if: inputs.terraform_action == 'destroy'
-        shell: bash
-        run: |
-          if [ "${{ inputs.destroy_confirmation }}" != "DESTROY" ]; then
-            echo "Destroy confirmation missing. Type DESTROY in the workflow input to continue."
-            exit 1
-          fi
 
       - name: Terraform apply
         if: inputs.terraform_action == 'apply'
