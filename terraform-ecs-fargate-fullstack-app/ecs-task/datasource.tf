@@ -1,7 +1,7 @@
 
 
 provider "aws" {
-  region = "us-east-1"
+  region = "eu-west-2"
 
 }
 
@@ -14,7 +14,7 @@ data "aws_vpc" "vpc" {
 
 data "aws_subnet" "private1" {
   vpc_id            = data.aws_vpc.vpc.id
-  availability_zone = "us-east-1a"
+  availability_zone = "eu-west-2a"
 
   filter {
     name   = "tag:Name"
@@ -24,7 +24,7 @@ data "aws_subnet" "private1" {
 
 data "aws_subnet" "private2" {
   vpc_id            = data.aws_vpc.vpc.id
-  availability_zone = "us-east-1b"
+  availability_zone = "eu-west-2b"
 
   filter {
     name   = "tag:Name"
@@ -43,7 +43,7 @@ data "aws_security_group" "sg" {
 
 data "aws_subnet" "public1" {
   vpc_id            = data.aws_vpc.vpc.id
-  availability_zone = "us-east-1a"
+  availability_zone = "eu-west-2a"
 
   filter {
     name   = "tag:Name"
@@ -53,7 +53,7 @@ data "aws_subnet" "public1" {
 
 data "aws_subnet" "public2" {
   vpc_id            = data.aws_vpc.vpc.id
-  availability_zone = "us-east-1b"
+  availability_zone = "eu-west-2b"
 
   filter {
     name   = "tag:Name"

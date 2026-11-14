@@ -47,7 +47,7 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ env.AWS_REGION_VAR != '' && env.AWS_REGION_VAR || env.AWS_REGION_SECRET != '' && env.AWS_REGION_SECRET || 'us-east-1' }}
+          aws-region: ${{ env.AWS_REGION_VAR != '' && env.AWS_REGION_VAR || env.AWS_REGION_SECRET != '' && env.AWS_REGION_SECRET || 'eu-west-2' }}
 
       - name: Show Terraform workflow context
         run: |
@@ -80,7 +80,7 @@ jobs:
           AWS_REGION="${AWS_REGION_VAR:-$AWS_REGION_SECRET}"
 
           if [ -z "$AWS_REGION" ]; then
-            AWS_REGION="us-east-1"
+            AWS_REGION="eu-west-2"
           fi
 
           if [ -z "$TF_STATE_BUCKET" ]; then
