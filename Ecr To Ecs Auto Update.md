@@ -391,8 +391,3 @@ Let me know if you want:
 * Monitoring setup (like Slack alert)
 
 I'm here like your tech buddy! 👶💻
-
-
-
-
-
