@@ -415,7 +415,7 @@ const Books = () => {
 
       <section className="market-hero">
         <div className="hero-copy">
-          <h2>Explore the best selling books</h2>
+          <h2>Explore the best selling books chimdi</h2>
           <p>Everyone is reading and recommending at Yash Academic.</p>
           <div className="hero-actions">
             <Link to="/add">
